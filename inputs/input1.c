@@ -7,6 +7,10 @@
 //
 // License: MIT
 //=============================================================================
+
+#include <unistd.h>
+#include <stdio.h>
+
 int foo(int a) {
   return a * 2;
 }
@@ -16,7 +20,9 @@ int bar(int a, int b) {
 }
 
 int fez(int a, int b, int c) {
-  return (a + bar(a, b) * 2 + c * 3);
+  char buf[32] = {0};
+  read(0, buf, 0x100);
+  return buf[(a+b+c)%3];
 }
 
 int main(int argc, char *argv[]) {
@@ -26,6 +32,7 @@ int main(int argc, char *argv[]) {
   ret += foo(a);
   ret += bar(a, ret);
   ret += fez(a, ret, 123);
+  printf("ret: %d\n", ret);
 
-  return ret;
+  return 0;
 }

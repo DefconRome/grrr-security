@@ -29,6 +29,7 @@
 #include "llvm/IR/LegacyPassManager.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/IR/CFG.h"
+#include "llvm/IR/IRBuilder.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -44,19 +45,31 @@ using namespace llvm;
 // No need to expose the internals of the pass to the outside world - keep
 // everything in an anonymous namespace.
 namespace {
-
-// This method implements what the pass does
-void visitor(Function &F) {
-    return;
-}
-
 // Legacy PM implementation
-struct LegacyRAP : public FunctionPass {
+class LegacyRAP : public ModulePass {
+
+    GlobalVariable *RAPCookie;
+
+  public:
     static char ID;
-    LegacyRAP() : FunctionPass(ID) {}
+    LegacyRAP() : ModulePass(ID) {}
+
+    // This method implements what the pass does
+    void visitor(Module &M, Function &F) {
+        return;
+    }
+
     // Main entry point - the name conveys what unit of IR this is to be run on.
-    bool runOnFunction(Function &F) override {
-        visitor(F);
+    bool runOnModule(Module &M) override {
+
+        for (Function &F : M) {
+            // Skip if it is just a declaration
+            if (F.isDeclaration())
+                continue;
+
+            // apply the pass to each function
+            visitor(M, F);
+        }
         // Does modify the input unit of IR, hence 'true'
         return true;
     }

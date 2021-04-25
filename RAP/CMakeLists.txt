@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.13.4)
-project(llvm-tutor-hello-world)
+project(rap)
+
+# taken from: https://github.com/banach-space/llvm-tutor
 
 #===============================================================================
 # 1. LOAD LLVM CONFIGURATION
@@ -12,8 +14,11 @@ set(LT_LLVM_INSTALL_DIR "" CACHE PATH "LLVM installation directory")
 list(APPEND CMAKE_PREFIX_PATH "${LT_LLVM_INSTALL_DIR}/lib/cmake/llvm/")
 
 find_package(LLVM REQUIRED CONFIG)
+if(NOT "12" VERSION_EQUAL "${LLVM_VERSION_MAJOR}")
+  message(FATAL_ERROR "Found LLVM ${LLVM_VERSION_MAJOR}, but need LLVM 12")
+endif()
 
-# HelloWorld includes headers from LLVM - update the include paths accordingly
+# includes headers from LLVM - update the include paths accordingly
 include_directories(SYSTEM ${LLVM_INCLUDE_DIRS})
 
 #===============================================================================
