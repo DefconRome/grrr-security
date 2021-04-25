@@ -1,9 +1,9 @@
 //=============================================================================
 // FILE:
-//      input_for_hello.c
+//      input1.c
 //
 // DESCRIPTION:
-//      Sample input file for HelloWorld and InjectFuncCall
+//      Sample input file, taken from: https://github.com/banach-space/llvm-tutor
 //
 // License: MIT
 //=============================================================================
