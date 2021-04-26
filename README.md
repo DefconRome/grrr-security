@@ -12,6 +12,14 @@ Fill the pass in `RAP/RAP.cpp` and build it with `LLVM_DIR=<path to llvm12> ./bu
 
 Compile a sample program using the `rap` pass with `LLVM_DIR=<path to llvm12> ./test.sh`.
 
+## LLVM resources
+
+[Writing an LLVM pass](https://llvm.org/docs/WritingAnLLVMPass.html)
+
+[Existing LLVM passes](https://llvm.org/docs/Passes.html)
+
+[LLVM IR Language reference](https://llvm.org/docs/LangRef.html)
+
 ## Common LLVM functions/routines
 
 ### Iterate over Functions in a Module
