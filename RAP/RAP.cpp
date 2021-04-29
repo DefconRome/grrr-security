@@ -4,6 +4,7 @@
 //
 // DESCRIPTION:
 //    GRRR
+// template inspired from: https://github.com/banach-space/llvm-tutor
 //
 // License: MIT
 //=============================================================================
@@ -47,8 +48,6 @@ using namespace llvm;
 namespace {
 // Legacy PM implementation
 class LegacyRAP : public ModulePass {
-
-    GlobalVariable *RAPCookie;
 
   public:
     static char ID;
