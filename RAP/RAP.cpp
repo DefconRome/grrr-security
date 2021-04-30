@@ -55,6 +55,55 @@ class LegacyRAP : public ModulePass {
 
     // This method implements what the pass does
     void visitor(Module &M, Function &F) {
+
+        if (F.getName() == "__rap_init") return;
+
+        GlobalVariable *RapCookie = M.getNamedGlobal("__rap_cookie");
+        assert(RapCookie);
+
+        Function* getAddrRetAddr = Intrinsic::getDeclaration(&M, Intrinsic::addressofreturnaddress, {Type::getInt64PtrTy(M.getContext())});
+        Function* trapFunc       = Intrinsic::getDeclaration(&M, Intrinsic::trap);
+
+        IRBuilder<> EntryBuilder(&*F.getEntryBlock().getFirstInsertionPt());
+        Value *addrOfRetAddr = EntryBuilder.CreateCall(getAddrRetAddr, {}, "addrofretaddr");
+        Value *retAddr       = EntryBuilder.CreateLoad(addrOfRetAddr, "retaddr");
+
+        Value *rapKey = EntryBuilder.CreateLoad(RapCookie);
+        Value *encRet = EntryBuilder.CreateXor(retAddr, rapKey, "encret");
+
+        std::set<ReturnInst*> returns;
+        for(BasicBlock &BB: F) {
+            for (Instruction &I: BB) {
+                if (ReturnInst *ret = dyn_cast<ReturnInst>(&I)) {
+                    returns.insert(ret);
+                }
+            }
+        }
+
+        BasicBlock *errBB = BasicBlock::Create(F.getContext(), "errBB", &F);
+        IRBuilder<> errBuilder(errBB);
+        errBuilder.CreateCall(trapFunc);
+        errBuilder.CreateUnreachable();
+
+        for (ReturnInst *ret : returns) {
+            BasicBlock *retBB = ret->getParent();
+            Value *retVal = ret->getReturnValue();
+            ret->eraseFromParent();
+
+            BasicBlock *okBB  = BasicBlock::Create(F.getContext(), "okBB", &F);
+            IRBuilder<> okBuilder(okBB);
+            okBuilder.CreateRet(retVal);
+
+            IRBuilder<> retBuilder(retBB);
+            Value *addrOfRetAddr = retBuilder.CreateCall(getAddrRetAddr, {}, "check_addrofretaddr");
+            Value *newRetAddr       = retBuilder.CreateLoad(addrOfRetAddr, "check_retaddr");
+
+            Value *rapKey = retBuilder.CreateLoad(RapCookie);
+            Value *decRet = retBuilder.CreateXor(encRet, rapKey);
+
+            Value *isOk = retBuilder.CreateICmpEQ(decRet, newRetAddr);
+            retBuilder.CreateCondBr(isOk, okBB, errBB);
+        }
         return;
     }
 
