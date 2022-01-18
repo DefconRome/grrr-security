@@ -1,5 +1,0 @@
-{
-    "C_Cpp.default.includePath": [
-        "/usr/lib/llvm-12/include",
-    ],
-}
